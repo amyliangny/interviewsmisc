@@ -1,162 +1,154 @@
-// // https://leetcode.com/problems/lru-cache/discuss/617415/JavaScript-2-Solutions-(ES6-Map-vs-Doubly-linked-list)
-// class Node {
-//     constructor(key,val){
-//         this.key = key;
-//         this.val = val;
-//         this.next = null;
-//         this.prev = null;
-//     }
-// }
+class Node {
+  constructor(key,val){
+      this.key = key;
+      this.val = val;
+      this.next = null;
+      this.prev = null;
+  }
+}
+//end means most recently used.
+class DoublyLinkedList {
+  constructor(){
+      this.head = null;
+      this.tail = null;
+      this.length = 0;
+  }
+  
+  //insert to end. end = most recently used.
+  insert(key,val){
+      //add to end
+      let newNode = new Node(key,val);
+      if (this.head === null){
+          this.head = newNode;
+          this.tail = this.head;
+      } else {
 
-// class DoublyLinkedList {
-//     constructor(){
-//         this.head = null;
-//         this.tail = null;
-//         this.length = 0;
-//     }
-    
-//     push(key,val){
-//         const newNode = new Node(key,val);
-//         if (!this.head){
-//             this.head = newNode;
-//             this.tail = newNode;
-//         } else {
-//             this.tail.next = newNode;
-//             newNode.prev = this.tail;
-//             this.tail = newNode;
+          let node = this.head;
+          while (node.next){
+              node = node.next;
+          }
+          
+          this.tail.next = newNode;
+          newNode.prev = this.tail;
+          this.tail = newNode;
+
+      }
+      this.length++;
+  }
+  
+  //remove from beginning
+  remove(){
+      let node = this.head;
+      //if list is empty, return.
+      if (this.length === 0) return;
+      
+      //if length is 1, set head and tail to null.
+      if (this.length === 1){
+          this.head = null;
+          this.tail = null;
+      } else {
+          //remove from front.
+          this.head = node.next;
+          this.head.prev = null; //can only use ? on right hand
+      } 
+      this.length--;
+  }
+  
+  //remove specific Key;
+  removeKey(key){
+      let node = this.head;
+      let val = -1;
+      
+      //if key is found in head
+      if (node?.key === key){ //added this
+          this.head = node.next;
+          this.length--;
+          return node.val;
+      }
+      
+      //if node is middle/end of ll
+      while (node){
+          if (node?.key === key){
+              
+              let curr = node;
+              let prev = curr.prev;
+              let next = curr.next;
+              // node.prev = next;
+              next.prev = prev;
+              // if (prev?.next){
+                  prev.next = next;
+              // }
+              curr.next = null;
+              curr.prev = null;
+              
+              this.length--;
+              return node.val;
+          } else {
+              node = node.next;
+          }
+      }
+      // this.length--; //added this and now it works? why?
+      // if (val === -1) this.remove();
+      return val;
+  }
+  
+//     get(key){
+      
+//         let node = this.head;
+//         //find node that has the key.
+//         while (node.key !== key){
+//             node = node.next;
 //         }
-//         this.length++;
-//         return newNode;
+//         //remove from its place and add to the end.
 //     }
-    
-//     remove(node){
-//         if (!node.next && !node.prev){ //if there's only 1 node
-//             this.head = null;
-//             this.tail = null;
-//         } else if (!node.next){ //if the node is tail node
-//             this.tail = node.prev;
-//             this.tail.next = null;
-//         } else if (!node.prev){ //if the node is head node
-//             this.head = node.next;
-//             this.head.prev = null;
-//         }
-//         this.length--;
-//     }
-// }
+}
 
-// //LRU = Least Recently Used
-// //O(1)
-// var LRUCache = function(capacity) {
-//     this.DLL = new DoublyLinkedList();
-//     this.map = {};
-//     this.capacity = capacity;
-// };
+var LRUCache = function(capacity) {
+  this.size = capacity;
+  this.remaining = capacity;
+  this.list = new DoublyLinkedList(capacity);
+  
+};
 
-// /** 
-//  * @param {number} key
-//  * @return {number}
-//  */
-// //if the key exists, return value. otherwise return -1
-// LRUCache.prototype.get = function(key) {
-//     if (!this.map[key]) return -1;
-//     const value = this.map[key].val;
-//     this.DLL.remove(this.map[key]);
-//     this.map[key] = this.DLL.push(key,value);
-//     return value;
-// };
+/** 
+* @param {number} key
+* @return {number}
+*/
+LRUCache.prototype.get = function(key) {
+  const val = this.list.removeKey(key);
+  this.list.insert(key);
+  console.log(this.list);
+  return val;
+};
 
-// /** 
-//  * @param {number} key 
-//  * @param {number} value
-//  * @return {void}
-//  */
-// //if key exists, update value. otherwise add the pair. if # keys exceeds capacity, EVICT the LRU key
-// LRUCache.prototype.put = function(key, value) {
-//     if (this.map[key]) this.DLL.remove(this.map[([key]));
-//     this.map[key] = this.DLL.push(key,value);
-//     if (this.DLL.length > this.capacity){
-//         const currKey = this.DLL.head.key;
-//         delete this.map[currKey];
-//         this.DLL.remove(this.DLL.head);
-//     }
-// };
-
-
-
-
-
-DoublyLinkedList {
-    head: <ref *1> Node {
-      key: 1,
-      val: 1,
-      next: Node { key: 2, val: 2, next: [Node], prev: [Circular *1] },
-      prev: Node { key: 2, val: 2, next: [Node], prev: [Circular *1] }
-    },
-    tail: <ref *2> Node {
-      key: 1,
-      val: undefined,
-      next: null,
-      prev: Node { key: 2, val: 2, next: [Circular *2], prev: [Node] }
-    },
-    length: 2
+/** 
+* @param {number} key 
+* @param {number} value
+* @return {void}
+*/
+LRUCache.prototype.put = function(key, value) {
+  // if (this.remaining > 0){
+      if (this.list.removeKey(key) === -1) this.remaining--;//if it is not -1, that means the node does exists. we are just updating.
+      this.list.insert(key,value);
+      // this.remaining--;
+      //check if key exists in ll. if it does, then change the val. otherwise insert new 
+  } else {
+      //remove from beg of list.
+      this.list.remove();
+      //add to end.
+      this.list.insert(key,value);
   }
-  DoublyLinkedList {
-    head: <ref *1> Node {
-      key: 2,
-      val: 2,
-      next: Node { key: 1, val: undefined, next: [Node], prev: [Circular *1] },
-      prev: Node { key: 1, val: undefined, next: [Node], prev: [Circular *1] }
-    },
-    tail: <ref *2> Node {
-      key: 2,
-      val: undefined,
-      next: null,
-      prev: Node { key: 3, val: 3, next: [Circular *2], prev: [Node] }
-    },
-    length: 2
-  }
-  DoublyLinkedList {
-    head: <ref *1> Node {
-      key: 1,
-      val: undefined,
-      next: Node { key: 3, val: 3, next: [Node], prev: [Circular *1] },
-      prev: Node { key: 3, val: 3, next: [Node], prev: [Circular *1] }
-    },
-    tail: <ref *2> Node {
-      key: 1,
-      val: undefined,
-      next: null,
-      prev: Node { key: 4, val: 4, next: [Circular *2], prev: [Node] }
-    },
-    length: 2
-  }
-  DoublyLinkedList {
-    head: Node {
-      key: 1,
-      val: undefined,
-      next: Node { key: 3, val: 3, next: [Node], prev: [Node] },
-      prev: Node { key: 3, val: 3, next: [Node], prev: [Node] }
-    },
-    tail: <ref *1> Node {
-      key: 3,
-      val: undefined,
-      next: null,
-      prev: Node { key: 1, val: undefined, next: [Circular *1], prev: [Node] }
-    },
-    length: 2
-  }
-  DoublyLinkedList {
-    head: Node {
-      key: 1,
-      val: undefined,
-      next: Node { key: 3, val: 3, next: [Node], prev: [Node] },
-      prev: Node { key: 3, val: 3, next: [Node], prev: [Node] }
-    },
-    tail: <ref *1> Node {
-      key: 4,
-      val: undefined,
-      next: null,
-      prev: Node { key: 3, val: undefined, next: [Circular *1], prev: [Node] }
-    },
-    length: 2
-  }
+  // this.list.removeKey(key) === -1 ? this.list.remove() : null;
+  // this.list.insert(key,value)
+  return;
+  
+};
+
+/** 
+* Your LRUCache object will be instantiated and called as such:
+* var obj = new LRUCache(capacity)
+* var param_1 = obj.get(key)
+* obj.put(key,value)
+*/
+
+// 1 4 7 9 
